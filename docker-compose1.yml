@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: dbt_user
+      POSTGRES_PASSWORD: dbt_password
+      POSTGRES_DB: itsm_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbt_user -d itsm_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.7.0
+    container_name: dbt
+    restart: always
+    platform: linux/amd64
+    volumes:
+      - ./dbt_project:/usr/app
+      - ~/.dbt:/root/.dbt
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["tail", "-f", "/dev/null"]
+  superset:
+    image: apache/superset:latest
+    container_name: superset
+    restart: always
+    environment:
+      - SUPERSET_SECRET_KEY=039abefcc9c2f333842b416ffcc614b263363257a371b43f0a24d491bdc7f10d
+      - SUPERSET_DATABASE_URI=postgresql+psycopg2://dbt_user:dbt_password@postgres:5432/itsm_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8090:8088"
+

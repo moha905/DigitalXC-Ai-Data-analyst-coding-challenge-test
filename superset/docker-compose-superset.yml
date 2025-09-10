@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  superset:
+    image: apache/superset:latest
+    container_name: superset
+    environment:
+      - SUPERSET_SECRET_KEY=039abefcc9c2f333842b416ffcc614b263363257a371b43f0a24d491bdc7f10d
+    ports:
+      - "8090:8088"
+    depends_on:
+      - postgres
+    restart: always

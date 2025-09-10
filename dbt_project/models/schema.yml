@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: public
+    database: itsm_db   # <- replace if your db name differs
+    schema: public
+    tables:
+      - name: tickets_raw
